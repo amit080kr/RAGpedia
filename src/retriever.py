@@ -10,7 +10,7 @@ class ResearchPaperRetriever:
     
     This retriever uses FAISS vector similarity search to find papers that are semantically
     similar to the user's query, with optional recency-based ranking.
-    Embedding model if needed: OpenAI's text-embedding-ada-002
+    Embedding model if needed: HuggingFaceEmbeddings(model_name="BAAI/bge-small-en-v1.5")
     """
     
     def __init__(self, vector_store: ResearchVectorStore):
