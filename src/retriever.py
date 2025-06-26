@@ -43,22 +43,6 @@ class ResearchPaperRetriever:
             
         Returns:
             List[Dict[str, Any]]: List of relevant research papers with metadata
-            
-        Raises:
-            ValueError: If query is empty or too short
-        
-        formatted_results
-            {
-                'rank': 1,
-                'title': "title",
-                'authors': 'authors',
-                'year': year,
-                'venue': 'venue',
-                'citations': 'n_citation',
-                'abstract': 'abstract'),
-                'similarity_score': 0.70,
-                'paper_id': 'id'            
-            }
         """
         if not query or query.strip() == "":
             logger.error("Query cannot be empty or whitespace-only.")
@@ -120,7 +104,3 @@ class ResearchPaperRetriever:
         """
         logger.info(f"Retrieving {k} papers for query: '{query}' with recency prioritization.")
         return self.retrieve_papers(query, k=k, use_recency=True)
-
-
-        
-        
