@@ -21,6 +21,8 @@ A semantic search engine for research papers using FAISS for efficient similarit
    pip install -r requirements.txt
 
 3. Data Preparation
+
+   
 Place your research papers in data/dataset.csv with these columns (case-insensitive):
 ```bash
 
