@@ -6,9 +6,10 @@ import pickle
 from pathlib import Path
 import logging
 from langchain.schema import Document
-from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv, find_dotenv
 import pandas as pd
+from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
+
 load_dotenv(find_dotenv())
 
 logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ class ResearchVectorStore:
         self.store_path.mkdir(parents=True, exist_ok=True)
 
         self.embedding_size = None
-        self.embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
+        self.embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-small-en-v1.5")
 
         self.index: Optional[faiss.IndexFlatL2] = None
         self.documents: List[str] = []
@@ -248,8 +249,7 @@ class ResearchVectorStore:
 
             if use_recency:
                 # Apply recency scoring and re-sort
-                current_year = 2025 # Assuming current year as per problem context
-
+                current_year = 2025 
                 for item in results:
                     year = item['metadata'].get('year')
 
