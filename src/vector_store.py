@@ -282,3 +282,5 @@ class ResearchVectorStore:
         except Exception as e:
             logger.error(f"Error during query_similar: {e}", exc_info=True)
             return []
+
+        
