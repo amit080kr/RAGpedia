@@ -4,85 +4,74 @@ import pandas as pd
 import logging
 from langchain_community.document_loaders import CSVLoader
 from langchain.schema import Document
-from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 
 class ResearchPaperLoader:
-    """
-    A class to load and process research papers from CSV files.
-    
-    This loader processes academic research papers and converts them into
-    a standardized document format for the vector store and retrieval system.
-    """
-    
     def __init__(self, data_path: str):
-        """
-        Initialize the document loader with the path to data files.
-        
-        Args:
-            data_path (str): Path to the CSV file containing research papers
-
-        Raise FileNotFoundError if data_path does not exists.
-
-        """
-        self.data_path =Path(data_path)
+        self.data_path = Path(data_path)
         if not self.data_path.exists():
-            raise FileNotFoundError(f"file not found at {self.data_path}")
-        logger.info(f"File Loaded at {self.data_path}")
+            raise FileNotFoundError(f"File not found at {self.data_path}")
+        logger.info(f"File loaded at {self.data_path}")
+
+    def _normalize_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize column names to handle case and common variations."""
+        column_mapping = {
+            'title': ['title', 'paper title', 'name'],
+            'authors': ['authors', 'author', 'creators'],
+            'year': ['year', 'publication year', 'date', 'pub year'],
+            'abstract': ['abstract', 'abstract note', 'summary', 'description'],
+            'venue': ['venue', 'journal', 'publication', 'conference'],
+            'n_citation': ['n_citation', 'citations', 'citation count']
+        }
         
+        # Create case-insensitive mapping
+        normalized_columns = {}
+        for standard_name, alternatives in column_mapping.items():
+            for col in df.columns:
+                if col.lower() in [alt.lower() for alt in alternatives]:
+                    normalized_columns[col] = standard_name
+                    break
         
-        
+        return df.rename(columns=normalized_columns)
 
     def create_documents(self) -> List[Document]:
-        """
-        Load research papers from CSV and convert to LangChain Document objects.
-
-        **source_column: title**\n
-        **metadata_columns: "abstract", "authors", "n_citation", "references", "venue", "year", "id"**
-        Returns:
-            List[Document]: List of Document objects representing research papers
-        """
-        logger.info(f"Loading documents from {self.data_path}")
         try:
-            loader = CSVLoader(
-                file_path=str(self.data_path),
-                csv_args={
-                    "delimiter": ",",
-                },
-                source_column="title"
-            )
-
-            documents = loader.load()
+            # Load and normalize columns
             df = pd.read_csv(self.data_path)
+            df = self._normalize_columns(df)
+            
+            # Validate required columns
+            required_columns = {'title', 'abstract'}
+            missing = required_columns - set(df.columns)
+            if missing:
+                raise ValueError(f"Missing required columns after normalization: {missing}")
 
-            processed_documents: List[Document] = []
-            metadata_columns_to_extract = ["title", "abstract", "authors", "n_citation", "references", "venue", "year", "id"]
-
-            for i, doc in enumerate(documents):
-                if i >= len(df):
-                    logger.warning(f"Row index {i} out of bounds for DataFrame. Skipping document.")
-                    continue
-
-                original_row = df.iloc[i]
-                new_metadata = {col: original_row[col] for col in metadata_columns_to_extract if col in original_row}
-
-                for key in new_metadata:
-                    if pd.notna(new_metadata[key]):
-                        new_metadata[key] = str(new_metadata[key])
-                    else:
-                        new_metadata[key] = "N/A"
-
-                processed_documents.append(
+            # Create documents with standardized column names
+            documents = []
+            metadata_columns = ['title', 'authors', 'year', 'abstract', 'venue', 'n_citation']
+            
+            for _, row in df.iterrows():
+                metadata = {
+                    'title': str(row.get('title', 'N/A')),
+                    'authors': str(row.get('authors', 'N/A')),
+                    'year': str(row.get('year', 'N/A')),
+                    'abstract': str(row.get('abstract', 'N/A')),
+                    'venue': str(row.get('venue', 'N/A')),
+                    'n_citation': str(row.get('n_citation', 'N/A')),
+                    'id': str(row.get('id', 'N/A'))  # Optional
+                }
+                
+                documents.append(
                     Document(
-                        page_content=doc.page_content,
-                        metadata=new_metadata
+                        page_content=f"{metadata['title']}\n{metadata['abstract']}",
+                        metadata=metadata
                     )
                 )
-
-            logger.info(f"Successfully loaded and processed {len(processed_documents)} documents.")
-            return processed_documents
-
+            
+            logger.info(f"Processed {len(documents)} documents")
+            return documents
+            
         except Exception as e:
-            logger.error(f"Error loading or processing documents: {e}", exc_info=True)
+            logger.error(f"Error creating documents: {e}", exc_info=True)
             return None
