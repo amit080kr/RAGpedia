@@ -34,7 +34,7 @@ class ResearchVectorStore:
         2. Create a directory for the store if it doesn't exist
         3. initialize embedding as self.embeddings, index as self.index, documents as self.documents
         4. initialize metadata as self.metadata, embedding size as self.embedding_size
-        5. Embedding Model to use: OpenAI's text-embedding-ada-002
+        5. Embedding Model to use: HuggingFaceEmbeddings(model_name="BAAI/bge-small-en-v1.5")
         """
         self.store_path = Path(store_path)
         self.store_path.mkdir(parents=True, exist_ok=True)
@@ -77,9 +77,9 @@ class ResearchVectorStore:
 
         Note:
         1. store documents and metadata to self.documents and self.metadata
-        2. embedd the documents
-        3. initialize FAISS index as self.index and add embedings to index: you can consider performing L2 normalization to embeddings and cast to float32
-        4. save the vector store using save function. (self.save to be implemented below.)
+        2. embed the documents
+        3. initialize FAISS index as self.index and add embedings to index: L2 normalization to embeddings and cast to float32
+        4. save the vector store using save function.
         """
         logger.info(f"Creating vector store for {len(documents)} documents.")
         self.documents = [doc.page_content for doc in documents]
@@ -253,7 +253,7 @@ class ResearchVectorStore:
                 for item in results:
                     year = item['metadata'].get('year')
 
-                    if pd.isna(year): # Check for NaN or None, assuming pandas might load it as NaN
+                    if pd.isna(year): # Check for NaN or None, assuming it might load it as NaN
                         # If year is missing, recency score is 0, only similarity matters
                         recency_score = 0.0
                         combined_score = item['similarity'] 
@@ -267,7 +267,7 @@ class ResearchVectorStore:
 
                             combined_score = 0.7 * item['similarity'] + 0.3 * recency_score
                         except (ValueError, TypeError):
-                            # Handle cases where year might be malformed or non-numeric
+                            # Handle cases where year might be non-numeric
                             recency_score = 0.0
                             combined_score = item['similarity']
                             logger.warning(f"Invalid year '{year}' for document {item['metadata'].get('id')}. Recency score not applied.")
@@ -282,5 +282,3 @@ class ResearchVectorStore:
         except Exception as e:
             logger.error(f"Error during query_similar: {e}", exc_info=True)
             return []
-
-        
