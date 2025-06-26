@@ -104,3 +104,7 @@ class ResearchPaperRetriever:
         """
         logger.info(f"Retrieving {k} papers for query: '{query}' with recency prioritization.")
         return self.retrieve_papers(query, k=k, use_recency=True)
+
+
+        
+        
