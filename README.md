@@ -36,7 +36,7 @@ Place your research papers in data/dataset.csv with these columns (case-insensit
 > 📝 Note: Column names are case-insensitive (e.g., "TITLE" or "title" both work) and can contain any columns.
 
 ```
-5. Usage
+4. Usage
   ```bash
    streamlit run app.py
   ```
@@ -46,6 +46,8 @@ Place your research papers in data/dataset.csv with these columns (case-insensit
 - Enter research topic/question
 - Specify the number of papers to retrieve
 - Toggle recency prioritization
+
+## How It Works
 
 ![flow_chat](https://github.com/user-attachments/assets/b2ee3d14-6d1c-4cc4-93bc-01f51bd09050)
 
