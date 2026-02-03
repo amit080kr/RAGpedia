@@ -13,6 +13,7 @@ torch>=2.0.0  # Required for HuggingFace embeddings
 pandas==2.1.0
 numpy==1.26.0
 python-dotenv==1.0.0
+bcrypt==4.1.2
 
 # Additional Utilities
 tqdm==4.66.1  # Progress bars
