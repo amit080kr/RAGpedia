@@ -285,12 +285,13 @@ def main():
     # Hide the "Limit 200MB per file" text using CSS
     st.markdown("""
         <style>
-        [data-testid="stFileUploader"] section > input + div > small {
-            display: none;
-        }
-        /* Fallback for different streamlit versions */
+        /* Target the small text inside the uploader */
         [data-testid="stFileUploader"] small {
-            display: none;
+            display: none !important;
+        }
+        /* Target the specific upload instructions if structured differently */
+        [data-testid="stFileUploader"] div[role="button"] + div {
+            display: none !important;
         }
         </style>
     """, unsafe_allow_html=True)
