@@ -17,6 +17,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger("research_paper_finder")
 
+# --- Debug: Check imports immediately ---
+try:
+    import sentence_transformers
+    logger.info("sentence_transformers successfully imported.")
+except ImportError as e:
+    logger.error(f"CRITICAL: Could not import sentence_transformers. Error: {e}")
+except Exception as e:
+    logger.error(f"CRITICAL: Unexpected error importing sentence_transformers. Error: {e}")
+# ----------------------------------------
+
 # Constants
 VECTOR_STORE_DIR = "faiss_store"
 # Make DATA_PATH empty by default — user can upload a CSV from the UI.
@@ -271,6 +281,20 @@ def main():
 
     # Set up the main page
     st.title("🔍 Academic Research Paper Finder (FAISS)")
+    
+    # Hide the "Limit 200MB per file" text using CSS
+    st.markdown("""
+        <style>
+        [data-testid="stFileUploader"] section > input + div > small {
+            display: none;
+        }
+        /* Fallback for different streamlit versions */
+        [data-testid="stFileUploader"] small {
+            display: none;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
     st.write("""
     Find relevant academic papers using FAISS for efficient semantic search. Enter your research topic 
     or question to discover papers related to your area of interest.
