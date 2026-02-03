@@ -212,7 +212,7 @@ def login_page():
     
     auth_manager = AuthManager()
     
-    tab1, tab2 = st.tabs(["Login", "Sign Up"])
+    tab1, tab2, tab3 = st.tabs(["Login", "Sign Up", "Forgot Password"])
     
     with tab1:
         username = st.text_input("Username", key="login_user")
@@ -228,12 +228,40 @@ def login_page():
     with tab2:
         new_user = st.text_input("Username", key="signup_user")
         new_pass = st.text_input("Password", type="password", key="signup_pass")
+        question = st.selectbox("Security Question", [
+            "What was the name of your first pet?",
+            "What is your mother's maiden name?",
+            "What city were you born in?",
+            "What was your favorite book as a child?"
+        ], key="signup_q")
+        answer = st.text_input("Security Answer", key="signup_a", help="This will be used to recover your password.")
+        
         if st.button("Sign Up"):
-            success, msg = auth_manager.register_user(new_user, new_pass)
-            if success:
-                st.success(msg)
+            if not new_user or not new_pass or not answer:
+                st.error("Please fill in all fields")
             else:
-                st.error(msg)
+                success, msg = auth_manager.register_user(new_user, new_pass, question, answer)
+                if success:
+                    st.success(msg)
+                else:
+                    st.error(msg)
+
+    with tab3:
+        reset_user = st.text_input("Username to Reset", key="reset_user")
+        if reset_user:
+            user_q = auth_manager.get_user_question(reset_user)
+            if user_q:
+                st.write(f"**Security Question:** {user_q}")
+                reset_answer = st.text_input("Answer", key="reset_a")
+                reset_pass = st.text_input("New Password", type="password", key="reset_p")
+                if st.button("Reset Password"):
+                    success, msg = auth_manager.reset_password(reset_user, reset_answer, reset_pass)
+                    if success:
+                        st.success(msg)
+                    else:
+                        st.error(msg)
+            else:
+                st.info("Enter a valid username to see your security question.")
 
 
 def main():
