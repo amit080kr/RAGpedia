@@ -396,15 +396,19 @@ def main():
 
 
 if __name__ == "__main__":
+    # Initialize session state for auth if not present
     if 'authenticated' not in st.session_state:
         st.session_state.authenticated = False
     
+    # Check if user is logged in
     if st.session_state.authenticated:
         with st.sidebar:
             st.write(f"Welcome!")
             if st.button("Logout"):
                 st.session_state.authenticated = False
                 st.rerun()
+        # Run main app only if authenticated
         main()
     else:
+        # Show login page if not authenticated
         login_page()
